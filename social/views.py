@@ -28,20 +28,33 @@ def register(request):
 
 @login_required
 def feed(request):
-    posts = Post.objects.all()
+    posts = Post.objects.prefetch_related('comments__user').all()
     
     if request.method == 'POST':
-        form = PostForm(request.POST, request.FILES)
-        if form.is_valid():
-            post = form.save(commit=False)
-            post.user = request.user
-            post.save()
-            return redirect('feed')
-    else:
-        form = PostForm()
+        if 'post_form' in request.POST:
+            form_post = PostForm(request.POST, request.FILES)
+            if form_post.is_valid():
+                post = form_post.save(commit=False)
+                post.user = request.user
+                post.save()
+                return redirect('feed')
+        
+        elif 'comment_form' in request.POST:
+            form_comment = CommentsForm(request.POST)
+            if form_comment.is_valid():
+                comment = form_comment.save(commit=False)
+                comment.user = request.user
+                comment.post_id = request.POST.get('post_id')
+                comment.save()
+                return redirect('feed')
+    
+    # Create empty forms for GET request
+    form_post = PostForm()
+    form_comment = CommentsForm()
     
     context = {
         'posts': posts,
-        'form': form,
+        'form_post': form_post,
+        'form_comment': form_comment,
     }
     return render(request, 'feed.html', context)
