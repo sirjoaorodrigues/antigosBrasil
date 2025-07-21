@@ -1,0 +1,54 @@
+<!-- cars/templates/cars/feed.html -->
+
+{% extends 'base.html' %}
+
+{% block title %}Feed{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <!-- Formulário de novo post -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Compartilhar</h5>
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-send"></i> Publicar
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Posts -->
+        {% for post in posts %}
+        <div class="card mb-3">
+            <div class="card-header">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-person-circle fs-3 me-2"></i>
+                    <div>
+                        <h6 class="mb-0">
+                                {{ post.user.username }}
+                        </h6>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card-body">
+                <p class="card-text">{{ post.text }}</p>
+                
+                {% if post.image %}
+                <img src="{{ post.image.url }}" class="img-fluid rounded" alt="Post image">
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> Nenhum post para mostrar. 
+            Comece a seguir outros usuários!
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
